@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lezione.titolo }} - MCU{% endblock %}
+
+{% block content %}
+<div class="lesson-viewer">
+    <div class="lesson-header">
+        <a href="{{ url_for('index') }}" class="btn btn-outline">← Torna ai corsi</a>
+        <h1>{{ lezione.titolo }}</h1>
+    </div>
+    
+    <div class="video-container">
+        <iframe src="{{ lezione.contenuto }}" 
+                frameborder="0" 
+                allowfullscreen
+                width="100%" 
+                height="600">
+        </iframe>
+    </div>
+    
+    <div class="lesson-info">
+        <h3>Descrizione</h3>
+        <p>{{ lezione.descrizione or 'Nessuna descrizione disponibile' }}</p>
+        
+        <div class="lesson-meta">
+            <span class="badge badge-video">Video</span>
+            {% if lezione.durata %}
+            <span class="badge">{{ lezione.durata }}</span>
+            {% endif %}
+        </div>
+        
+        <form action="{{ url_for('completa_lezione', lezione_id=lezione.id) }}" method="POST">
+            <button type="submit" class="btn btn-success">✓ Segna come completata</button>
+        </form>
+        
+        <div class="lesson-navigation">
+            <a href="{{ url_for('index') }}" class="btn btn-primary">Torna alla Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

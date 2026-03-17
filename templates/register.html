@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Registrati - MCU{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h1>Crea Account MCU</h1>
+        <form method="POST" action="{{ url_for('register') }}">
+            <div class="form-group">
+                <label for="username">Username *</label>
+                <input type="text" id="username" name="username" required placeholder="Scegli un username">
+            </div>
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" name="email" required placeholder="La tua email">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" name="nome" placeholder="Il tuo nome">
+                </div>
+                <div class="form-group">
+                    <label for="cognome">Cognome</label>
+                    <input type="text" id="cognome" name="cognome" placeholder="Il tuo cognome">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="password">Password *</label>
+                <input type="password" id="password" name="password" required minlength="6" placeholder="Minimo 6 caratteri">
+            </div>
+            <div class="form-group">
+                <label for="password_confirm">Conferma Password *</label>
+                <input type="password" id="password_confirm" name="password_confirm" required minlength="6" placeholder="Ripeti la password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Registrati</button>
+        </form>
+        <p class="auth-link">
+            Hai già un account? <a href="{{ url_for('login') }}">Accedi</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - MCU{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Benvenuto, {{ current_user.username }}!</h1>
+        <p class="dashboard-subtitle">Ecco il riepilogo della tua attività</p>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Lezioni Completate</h3>
+            <p class="stat-number">{{ lezioni_completate }} / {{ totale_lezioni }}</p>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ (lezioni_completate / totale_lezioni * 100) if totale_lezioni > 0 else 0 }}%;"></div>
+            </div>
+            <p class="stat-percentage">{{ "%.1f"|format((lezioni_completate / totale_lezioni * 100) if totale_lezioni > 0 else 0) }}%</p>
+        </div>
+        
+        <div class="stat-card">
+            <h3>Corsi Disponibili</h3>
+            <p class="stat-number">{{ corsi_disponibili or 3 }}</p>
+            <p class="stat-label">Esplora nuovi contenuti</p>
+        </div>
+        
+        <div class="stat-card">
+            <h3>Data Iscrizione</h3>
+            <p class="stat-number">{{ current_user.data_registrazione.strftime('%d/%m/%Y') }}</p>
+            <p class="stat-label">Benvenuto nella community</p>
+        </div>
+    </div>
+    
+    <div class="dashboard-actions">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Vai ai Corsi</a>
+        <a href="{{ url_for('admin') }}" class="btn btn-outline">Admin Panel</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+    </div>
+    
+    <div class="dashboard-recent">
+        <h2>I Tuoi Progressi Recenti</h2>
+        <div class="recent-activity">
+            {% if current_user.progressi %}
+                <ul class="activity-list">
+                    {% for progresso in current_user.progressi[-5:] %}
+                    <li class="activity-item">
+                        <span class="activity-icon">✓</span>
+                        <span class="activity-text">Lezione completata</span>
+                        <span class="activity-date">{{ progresso.data_completamento.strftime('%d/%m/%Y') if progresso.data_completamento else 'N/A' }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="no-activity">Nessuna attività recente. Inizia a studiare!</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - Gestione Contenuti{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <header class="admin-header">
+        <h1>⚙️ Pannello di Amministrazione</h1>
+        <a href="{{ url_for('index') }}" class="btn btn-outline">← Torna al Portale</a>
+    </header>
+
+    <div class="admin-grid">
+        <!-- GESTIONE CORSI -->
+        <div class="admin-section">
+            <h2>📚 Gestione Corsi</h2>
+            
+            <div class="form-card">
+                <h3>Aggiungi Nuovo Corso</h3>
+                <form action="{{ url_for('aggiungi_corso') }}" method="POST" class="inline-form">
+                    <input type="text" name="nome" placeholder="Nome Corso" required>
+                    <input type="text" name="descrizione" placeholder="Descrizione">
+                    <input type="color" name="colore" value="#FF6B35" title="Colore">
+                    <input type="number" name="ordine" placeholder="Ordine" value="0" min="0">
+                    <button type="submit" class="btn btn-primary">Aggiungi Corso</button>
+                </form>
+            </div>
+
+            <div class="list-container">
+                {% for corso in corsi %}
+                <div class="list-item" style="border-left: 4px solid {{ corso.colore }}">
+                    <div class="list-item-content">
+                        <strong>{{ corso.nome }}</strong>
+                        <small>{{ corso.descrizione or 'Nessuna descrizione' }}</small>
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="btn-small" onclick="toggleForm('edit-corso-{{ corso.id }}')">Modifica</button>
+                        <a href="{{ url_for('elimina_corso', id=corso.id) }}" class="btn-small btn-danger" onclick="return confirm('Sei sicuro?')">Elimina</a>
+                    </div>
+                    
+                    <!-- Form Modifica Corso -->
+                    <form id="edit-corso-{{ corso.id }}" class="edit-form" action="{{ url_for('modifica_corso', id=corso.id) }}" method="POST" style="display: none;">
+                        <input type="text" name="nome" value="{{ corso.nome }}" required>
+                        <input type="text" name="descrizione" value="{{ corso.descrizione or '' }}">
+                        <input type="color" name="colore" value="{{ corso.colore }}">
+                        <input type="number" name="ordine" value="{{ corso.ordine }}">
+                        <button type="submit" class="btn btn-primary btn-small">Salva</button>
+                        <button type="button" class="btn btn-small" onclick="toggleForm('edit-corso-{{ corso.id }}')">Annulla</button>
+                    </form>
+
+                    <!-- Gestione Moduli del Corso -->
+                    <div class="nested-section">
+                        <h4>Moduli</h4>
+                        <form action="{{ url_for('aggiungi_modulo', corso_id=corso.id) }}" method="POST" class="inline-form">
+                            <input type="text" name="nome" placeholder="Nome Modulo" required>
+                            <input type="text" name="descrizione" placeholder="Descrizione">
+                            <input type="number" name="ordine" placeholder="Ordine" value="0" min="0">
+                            <button type="submit" class="btn btn-secondary btn-small">+ Modulo</button>
+                        </form>
+
+                        {% for modulo in corso.moduli %}
+                        <div class="nested-item">
+                            <div class="nested-item-header">
+                                <span>{{ modulo.nome }}</span>
+                                <div>
+                                    <button class="btn-tiny" onclick="toggleForm('edit-modulo-{{ modulo.id }}')">✏️</button>
+                                    <a href="{{ url_for('elimina_modulo', id=modulo.id) }}" class="btn-tiny btn-danger" onclick="return confirm('Eliminare?')">🗑️</a>
+                                </div>
+                            </div>
+                            
+                            <form id="edit-modulo-{{ modulo.id }}" class="edit-form" action="{{ url_for('modifica_modulo', id=modulo.id) }}" method="POST" style="display: none;">
+                                <input type="text" name="nome" value="{{ modulo.nome }}" required>
+                                <input type="text" name="descrizione" value="{{ modulo.descrizione or '' }}">
+                                <input type="number" name="ordine" value="{{ modulo.ordine }}">
+                                <button type="submit" class="btn btn-primary btn-small">Salva</button>
+                                <button type="button" class="btn btn-small" onclick="toggleForm('edit-modulo-{{ modulo.id }}')">Annulla</button>
+                            </form>
+
+                            <!-- Gestione Lezioni del Modulo -->
+                            <div class="lessons-section">
+                                <h5>Lezioni</h5>
+                                <form action="{{ url_for('aggiungi_lezione', modulo_id=modulo.id) }}" method="POST" class="inline-form" enctype="multipart/form-data">
+                                    <input type="text" name="titolo" placeholder="Titolo Lezione" required>
+                                    <input type="text" name="descrizione" placeholder="Descrizione">
+                                    <select name="tipo" required>
+                                        <option value="video">Video</option>
+                                        <option value="pdf">PDF</option>
+                                        <option value="link">Link Esterno</option>
+                                        <option value="file">File Upload</option>
+                                    </select>
+                                    <input type="text" name="contenuto" placeholder="URL o percorso" required>
+                                    <input type="file" name="file" accept=".pdf,.doc,.docx,.zip,.mp4">
+                                    <input type="text" name="durata" placeholder="Durata (es: 15 min)">
+                                    <input type="number" name="ordine" placeholder="Ordine" value="0" min="0">
+                                    <button type="submit" class="btn btn-success btn-small">+ Lezione</button>
+                                </form>
+
+                                {% for lezione in modulo.lezioni %}
+                                <div class="lesson-item-admin">
+                                    <span class="badge badge-{{ lezione.tipo }}">{{ lezione.tipo.upper() }}</span>
+                                    <strong>{{ lezione.titolo }}</strong>
+                                    <small>{{ lezione.durata or '' }}</small>
+                                    <div class="actions">
+                                        <button class="btn-tiny" onclick="toggleForm('edit-lezione-{{ lezione.id }}')">✏️</button>
+                                        <a href="{{ url_for('elimina_lezione', id=lezione.id) }}" class="btn-tiny btn-danger" onclick="return confirm('Eliminare?')">🗑️</a>
+                                    </div>
+                                    
+                                    <form id="edit-lezione-{{ lezione.id }}" class="edit-form" action="{{ url_for('modifica_lezione', id=lezione.id) }}" method="POST" style="display: none;">
+                                        <input type="text" name="titolo" value="{{ lezione.titolo }}" required>
+                                        <input type="text" name="descrizione" value="{{ lezione.descrizione or '' }}">
+                                        <select name="tipo" required>
+                                            <option value="video" {% if lezione.tipo == 'video' %}selected{% endif %}>Video</option>
+                                            <option value="pdf" {% if lezione.tipo == 'pdf' %}selected{% endif %}>PDF</option>
+                                            <option value="link" {% if lezione.tipo == 'link' %}selected{% endif %}>Link</option>
+                                            <option value="file" {% if lezione.tipo == 'file' %}selected{% endif %}>File</option>
+                                        </select>
+                                        <input type="text" name="contenuto" value="{{ lezione.contenuto or '' }}" required>
+                                        <input type="text" name="durata" value="{{ lezione.durata or '' }}">
+                                        <input type="number" name="ordine" value="{{ lezione.ordine }}">
+                                        <button type="submit" class="btn btn-primary btn-small">Salva</button>
+                                        <button type="button" class="btn btn-small" onclick="toggleForm('edit-lezione-{{ lezione.id }}')">Annulla</button>
+                                    </form>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
