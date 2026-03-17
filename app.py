@@ -130,18 +130,33 @@ def index(): return render_template('index.html', corsi=Corso.query.order_by(Cor
 @login_required
 def admin(): return render_template('admin.html', corsi=Corso.query.order_by(Corso.ordine).all())
 
-# Admin routes (semplificate)
+# ─── AGGIUNGI ────────────────────────────────────────────────────────────────
+
 @app.route('/admin/corso/aggiungi', methods=['POST'])
 @login_required
 def aggiungi_corso():
-    db.session.add(Corso(nome=request.form['nome'], descrizione=request.form.get('descrizione',''), colore=request.form.get('colore','#FF6B35'), ordine=request.form.get('ordine',0)))
-    db.session.commit(); flash('Corso aggiunto!', 'success'); return redirect(url_for('admin'))
+    db.session.add(Corso(
+        nome=request.form['nome'],
+        descrizione=request.form.get('descrizione', ''),
+        colore=request.form.get('colore', '#FF6B35'),
+        ordine=request.form.get('ordine', 0)
+    ))
+    db.session.commit()
+    flash('Corso aggiunto!', 'success')
+    return redirect(url_for('admin'))
 
 @app.route('/admin/modulo/aggiungi/<int:corso_id>', methods=['POST'])
 @login_required
 def aggiungi_modulo(corso_id):
-    db.session.add(Modulo(nome=request.form['nome'], descrizione=request.form.get('descrizione',''), corso_id=corso_id, ordine=request.form.get('ordine',0)))
-    db.session.commit(); flash('Modulo aggiunto!', 'success'); return redirect(url_for('admin'))
+    db.session.add(Modulo(
+        nome=request.form['nome'],
+        descrizione=request.form.get('descrizione', ''),
+        corso_id=corso_id,
+        ordine=request.form.get('ordine', 0)
+    ))
+    db.session.commit()
+    flash('Modulo aggiunto!', 'success')
+    return redirect(url_for('admin'))
 
 @app.route('/admin/lezione/aggiungi/<int:modulo_id>', methods=['POST'])
 @login_required
@@ -149,9 +164,92 @@ def aggiungi_lezione(modulo_id):
     contenuto = request.form['contenuto']
     if request.form['tipo'] == 'file' and 'file' in request.files:
         file = request.files['file']
-        if file and file.filename: filename = secure_filename(file.filename); file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename)); contenuto = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    db.session.add(Lezione(titolo=request.form['titolo'], descrizione=request.form.get('descrizione',''), modulo_id=modulo_id, tipo=request.form['tipo'], contenuto=contenuto, durata=request.form.get('durata',''), ordine=request.form.get('ordine',0)))
-    db.session.commit(); flash('Lezione aggiunta!', 'success'); return redirect(url_for('admin'))
+        if file and file.filename:
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            contenuto = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    db.session.add(Lezione(
+        titolo=request.form['titolo'],
+        descrizione=request.form.get('descrizione', ''),
+        modulo_id=modulo_id,
+        tipo=request.form['tipo'],
+        contenuto=contenuto,
+        durata=request.form.get('durata', ''),
+        ordine=request.form.get('ordine', 0)
+    ))
+    db.session.commit()
+    flash('Lezione aggiunta!', 'success')
+    return redirect(url_for('admin'))
+
+# ─── MODIFICA ────────────────────────────────────────────────────────────────
+
+@app.route('/admin/corso/<int:id>/modifica', methods=['POST'])
+@login_required
+def modifica_corso(id):
+    corso = Corso.query.get_or_404(id)
+    corso.nome = request.form['nome']
+    corso.descrizione = request.form.get('descrizione', '')
+    corso.colore = request.form.get('colore', '#FF6B35')
+    corso.ordine = request.form.get('ordine', 0)
+    db.session.commit()
+    flash('Corso aggiornato!', 'success')
+    return redirect(url_for('admin'))
+
+@app.route('/admin/modulo/<int:id>/modifica', methods=['POST'])
+@login_required
+def modifica_modulo(id):
+    modulo = Modulo.query.get_or_404(id)
+    modulo.nome = request.form['nome']
+    modulo.descrizione = request.form.get('descrizione', '')
+    modulo.ordine = request.form.get('ordine', 0)
+    db.session.commit()
+    flash('Modulo aggiornato!', 'success')
+    return redirect(url_for('admin'))
+
+@app.route('/admin/lezione/<int:id>/modifica', methods=['POST'])
+@login_required
+def modifica_lezione(id):
+    lezione = Lezione.query.get_or_404(id)
+    lezione.titolo = request.form['titolo']
+    lezione.descrizione = request.form.get('descrizione', '')
+    lezione.tipo = request.form['tipo']
+    lezione.contenuto = request.form.get('contenuto', '')
+    lezione.durata = request.form.get('durata', '')
+    lezione.ordine = request.form.get('ordine', 0)
+    db.session.commit()
+    flash('Lezione aggiornata!', 'success')
+    return redirect(url_for('admin'))
+
+# ─── ELIMINA ─────────────────────────────────────────────────────────────────
+
+@app.route('/admin/corso/<int:id>/elimina')
+@login_required
+def elimina_corso(id):
+    obj = Corso.query.get_or_404(id)
+    db.session.delete(obj)
+    db.session.commit()
+    flash('Corso eliminato!', 'success')
+    return redirect(url_for('admin'))
+
+@app.route('/admin/modulo/<int:id>/elimina')
+@login_required
+def elimina_modulo(id):
+    obj = Modulo.query.get_or_404(id)
+    db.session.delete(obj)
+    db.session.commit()
+    flash('Modulo eliminato!', 'success')
+    return redirect(url_for('admin'))
+
+@app.route('/admin/lezione/<int:id>/elimina')
+@login_required
+def elimina_lezione(id):
+    obj = Lezione.query.get_or_404(id)
+    db.session.delete(obj)
+    db.session.commit()
+    flash('Lezione eliminata!', 'success')
+    return redirect(url_for('admin'))
+
+# ─── ROUTE GENERICA (mantenuta per retrocompatibilità) ───────────────────────
 
 @app.route('/admin/<tipo>/<int:id>/elimina')
 @login_required
@@ -159,7 +257,10 @@ def elimina(tipo, id):
     if tipo == 'corso': obj = Corso.query.get_or_404(id)
     elif tipo == 'modulo': obj = Modulo.query.get_or_404(id)
     elif tipo == 'lezione': obj = Lezione.query.get_or_404(id)
-    db.session.delete(obj); db.session.commit(); flash('Eliminato!', 'success'); return redirect(url_for('admin'))
+    else: flash('Tipo non valido.', 'error'); return redirect(url_for('admin'))
+    db.session.delete(obj); db.session.commit()
+    flash('Eliminato!', 'success')
+    return redirect(url_for('admin'))
 
 if __name__ == '__main__':
     with app.app_context(): db.create_all()
