@@ -968,4 +968,22 @@ body {
     .pdf-actions {
         flex-direction: column;
     }
+}.modules-list, .lessons-list {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.course-item.active .modules-list,
+.module-item.active .lessons-list {
+    max-height: 1000px;
+}
+
+.lesson-item {
+    cursor: pointer;
+    padding: 8px 20px 8px 55px;
+}
+
+.lesson-item:hover {
+    background-color: #333;
 }

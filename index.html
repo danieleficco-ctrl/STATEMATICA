@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Portale MCU E-Learning - Home{% endblock %}
+
+{% block content %}
+<div class="app-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo-area">MCU</div>
+        <ul class="menu">
+            {% for corso in corsi %}
+            <li class="course-item" data-corso-id="{{ corso.id }}">
+                <div class="course-title" onclick="toggleCourse(this)">
+                    {{ corso.nome }} <span class="chevron">▶</span>
+                </div>
+                <ul class="modules-list">
+                    {% for modulo in corso.moduli %}
+                    <li class="module-item" 
+                        data-modulo-id="{{ modulo.id }}"
+                        data-corso-id="{{ corso.id }}">
+                        <div class="module-title" onclick="toggleModule(this)">
+                            {{ modulo.nome }} <span class="chevron">▼</span>
+                        </div>
+                        <ul class="lessons-list">
+                            {% for lezione in modulo.lezioni %}
+                            <li class="lesson-item" data-lezione-id="{{ lezione.id }}">
+                                <span class="lesson-icon">
+                                    {% if lezione.tipo == 'video' %}▶{% elif lezione.tipo == 'pdf' %}📄{% else %}📎{% endif %}
+                                </span>
+                                <span class="lesson-title">{{ lezione.titolo }}</span>
+                                {% if lezione.durata %}
+                                <span class="lesson-duration">{{ lezione.durata }}</span>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </li>
+            {% endfor %}
+        </ul>
+        <div class="admin-link">
+            <a href="{{ url_for('admin') }}">⚙️ Admin Panel</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1>Dashboard Corsi</h1>
+            <input type="text" id="searchInput" class="search-bar" placeholder="Cerca corsi, moduli o lezioni...">
+        </div>
+
+        <!-- Welcome Card -->
+        <div class="welcome-card">
+            <h2>Benvenuti alla Multidisciplinary Challenge University</h2>
+            <p>Seleziona un corso dalla sidebar per iniziare a studiare</p>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-number">{{ corsi|length }}</span>
+                    <span class="stat-label">Corsi Disponibili</span>
+                </div>
+                <div class="stat-item">
+                    {% set total_moduli = namespace(count=0) %}
+                    {% for corso in corsi %}
+                        {% set total_moduli.count = total_moduli.count + corso.moduli|length %}
+                    {% endfor %}
+                    <span class="stat-number">{{ total_moduli.count }}</span>
+                    <span class="stat-label">Moduli</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards Grid -->
+        <div class="cards-grid">
+            {% for corso in corsi %}
+                {% for modulo in corso.moduli %}
+                    {% for lezione in modulo.lezioni %}
+                    <div class="card" 
+                         data-corso="{{ corso.nome }}" 
+                         data-modulo="{{ modulo.nome }}" 
+                         data-titolo="{{ lezione.titolo }}"
+                         data-corso-id="{{ corso.id }}"
+                         data-modulo-id="{{ modulo.id }}"
+                         data-lezione-id="{{ lezione.id }}">
+                        <div class="card-body">
+                            <span class="card-icon">
+                                {% if lezione.tipo == 'video' %}▶{% elif lezione.tipo == 'pdf' %}📄{% else %}📎{% endif %}
+                            </span>
+                            <h3 class="card-title">{{ lezione.titolo }}</h3>
+                            <p class="card-desc">{{ lezione.descrizione or 'Nessuna descrizione' }}</p>
+                            <div class="card-meta">
+                                <span class="badge">{{ corso.nome }}</span>
+                                <span class="badge">{{ modulo.nome }}</span>
+                                {% if lezione.tipo == 'video' %}
+                                    <span class="badge badge-video">Video</span>
+                                {% elif lezione.tipo == 'pdf' %}
+                                    <span class="badge badge-pdf">PDF</span>
+                                {% elif lezione.tipo == 'link' %}
+                                    <span class="badge badge-link">Link</span>
+                                {% else %}
+                                    <span class="badge badge-file">File</span>
+                                {% endif %}
+                                {% if lezione.durata %}
+                                <span class="badge">{{ lezione.durata }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {{ lezione.completamento }}%;"></div>
+                            </div>
+                            <div style="margin-top: 15px;">
+                                {% if current_user.is_authenticated %}
+                                    {% if lezione.tipo == 'video' and lezione.contenuto %}
+                                        <a href="{{ url_for('visualizza_lezione', lezione_id=lezione.id) }}" class="btn btn-primary btn-small">Guarda Video</a>
+                                    {% elif lezione.tipo == 'pdf' and lezione.contenuto %}
+                                        <a href="{{ url_for('visualizza_lezione', lezione_id=lezione.id) }}" class="btn btn-secondary btn-small">Apri PDF</a>
+                                    {% elif lezione.tipo == 'link' and lezione.contenuto %}
+                                        <a href="{{ lezione.contenuto }}" target="_blank" class="btn btn-info btn-small">Visita Link</a>
+                                    {% elif lezione.tipo == 'file' and lezione.contenuto %}
+                                        <a href="{{ url_for('download_file', filename=lezione.contenuto.split('/')[-1]) }}" class="btn btn-success btn-small">Scarica File</a>
+                                    {% endif %}
+                                {% else %}
+                                    <a href="{{ url_for('login') }}" class="btn btn-primary btn-small">Accedi per visualizzare</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
