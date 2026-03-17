@@ -3,47 +3,40 @@
 {% block title %}Portale MCU E-Learning - Home{% endblock %}
 
 {% block content %}
+<!-- App Container - WRAPPER PRINCIPALE -->
 <div class="app-container">
+    
     <!-- Sidebar -->
     <div class="sidebar">
-        <div class="logo-area">MCU</div>
-        <ul class="menu">
-            {% for corso in corsi %}
-            <li class="course-item" data-corso-id="{{ corso.id }}">
-                <div class="course-title" onclick="toggleCourse(this)">
-                    {{ corso.nome }} <span class="chevron">▶</span>
-                </div>
-                <ul class="modules-list">
-                    {% for modulo in corso.moduli %}
-                    <li class="module-item" 
-                        data-modulo-id="{{ modulo.id }}"
-                        data-corso-id="{{ corso.id }}">
-                        <div class="module-title" onclick="toggleModule(this)">
-                            {{ modulo.nome }} <span class="chevron">▼</span>
-                        </div>
-                        <ul class="lessons-list">
-                            {% for lezione in modulo.lezioni %}
-                            <li class="lesson-item" data-lezione-id="{{ lezione.id }}">
-                                <span class="lesson-icon">
-                                    {% if lezione.tipo == 'video' %}▶{% elif lezione.tipo == 'pdf' %}📄{% else %}📎{% endif %}
-                                </span>
-                                <span class="lesson-title">{{ lezione.titolo }}</span>
-                                {% if lezione.durata %}
-                                <span class="lesson-duration">{{ lezione.durata }}</span>
-                                {% endif %}
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </li>
-            {% endfor %}
-        </ul>
-        <div class="admin-link">
-            <a href="{{ url_for('admin') }}">⚙️ Admin Panel</a>
-        </div>
-    </div>
+    <div class="logo-area">MCU</div>
+    <ul class="menu">
+        {% for corso in corsi %}
+        <li class="course-item" data-corso-id="{{ corso.id }}">
+            <div class="course-title" onclick="toggleCourse(this)">
+                {{ corso.nome }} <span class="chevron">▶</span>
+            </div>
+            <ul class="modules-list">
+                {% for modulo in corso.moduli %}
+                <li class="module-item" data-modulo-id="{{ modulo.id }}">
+                    <div class="module-title" onclick="toggleModule(this)">
+                        {{ modulo.nome }} <span class="chevron">▼</span>
+                    </div>
+                    <ul class="lessons-list">
+                        {% for lezione in modulo.lezioni %}
+                        <li class="lesson-item" data-lezione-id="{{ lezione.id }}" onclick="selectLesson({{ lezione.id }})">
+                            <span class="lesson-icon">▶</span>
+                            <span class="lesson-title">{{ lezione.titolo }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+    <div class="admin-link"><a href="{{ url_for('admin') }}">⚙️ Admin Panel</a></div>
+</div>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -86,7 +79,13 @@
                          data-lezione-id="{{ lezione.id }}">
                         <div class="card-body">
                             <span class="card-icon">
-                                {% if lezione.tipo == 'video' %}▶{% elif lezione.tipo == 'pdf' %}📄{% else %}📎{% endif %}
+                                {% if lezione.tipo == 'video' %}
+                                    ▶
+                                {% elif lezione.tipo == 'pdf' %}
+                                    📄
+                                {% else %}
+                                    📎
+                                {% endif %}
                             </span>
                             <h3 class="card-title">{{ lezione.titolo }}</h3>
                             <p class="card-desc">{{ lezione.descrizione or 'Nessuna descrizione' }}</p>
@@ -110,18 +109,14 @@
                                 <div class="progress-fill" style="width: {{ lezione.completamento }}%;"></div>
                             </div>
                             <div style="margin-top: 15px;">
-                                {% if current_user.is_authenticated %}
-                                    {% if lezione.tipo == 'video' and lezione.contenuto %}
-                                        <a href="{{ url_for('visualizza_lezione', lezione_id=lezione.id) }}" class="btn btn-primary btn-small">Guarda Video</a>
-                                    {% elif lezione.tipo == 'pdf' and lezione.contenuto %}
-                                        <a href="{{ url_for('visualizza_lezione', lezione_id=lezione.id) }}" class="btn btn-secondary btn-small">Apri PDF</a>
-                                    {% elif lezione.tipo == 'link' and lezione.contenuto %}
-                                        <a href="{{ lezione.contenuto }}" target="_blank" class="btn btn-info btn-small">Visita Link</a>
-                                    {% elif lezione.tipo == 'file' and lezione.contenuto %}
-                                        <a href="{{ url_for('download_file', filename=lezione.contenuto.split('/')[-1]) }}" class="btn btn-success btn-small">Scarica File</a>
-                                    {% endif %}
-                                {% else %}
-                                    <a href="{{ url_for('login') }}" class="btn btn-primary btn-small">Accedi per visualizzare</a>
+                                {% if lezione.tipo == 'video' and lezione.contenuto %}
+                                    <a href="{{ lezione.contenuto }}" target="_blank" class="btn btn-primary btn-small">Guarda Video</a>
+                                {% elif lezione.tipo == 'pdf' and lezione.contenuto %}
+                                    <a href="{{ lezione.contenuto }}" target="_blank" class="btn btn-secondary btn-small">Apri PDF</a>
+                                {% elif lezione.tipo == 'link' and lezione.contenuto %}
+                                    <a href="{{ lezione.contenuto }}" target="_blank" class="btn btn-info btn-small">Visita Link</a>
+                                {% elif lezione.tipo == 'file' and lezione.contenuto %}
+                                    <a href="{{ url_for('static', filename='uploads/' + lezione.contenuto.split('/')[-1]) }}" class="btn btn-success btn-small">Scarica File</a>
                                 {% endif %}
                             </div>
                         </div>
@@ -131,5 +126,7 @@
             {% endfor %}
         </div>
     </div>
+    
 </div>
+<!-- Fine App Container -->
 {% endblock %}
