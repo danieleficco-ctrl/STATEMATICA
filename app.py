@@ -130,6 +130,10 @@ def index(): return render_template('index.html', corsi=Corso.query.order_by(Cor
 @app.route('/admin')
 @login_required
 def admin(): return render_template('admin.html', corsi=Corso.query.order_by(Corso.ordine).all())
+@app.route('/debug-routes')
+def debug_routes():
+    routes = [str(rule) for rule in app.url_map.iter_rules()]
+    return '<br>'.join(sorted(routes))    
 
 # ─── AGGIUNGI ────────────────────────────────────────────────────────────────
 
