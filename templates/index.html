@@ -23,7 +23,12 @@
                     </div>
                     <ul class="lessons-list">
                         {% for lezione in modulo.lezioni %}
-                        <li class="lesson-item" data-lezione-id="{{ lezione.id }}" onclick="selectLesson({{ lezione.id }})">
+                        <li class="lesson-item" data-lezione-id="{{ lezione.id }}" 
+                                
+<div class="module-title" onclick="toggleModule(this)">
+                        {{ modulo.nome }} <span class="chevron">▼</span>
+                    </div>
+onclick="selectLesson({{ lezione.id }})">
                             <span class="lesson-icon">▶</span>
                             <span class="lesson-title">{{ lezione.titolo }}</span>
                         </li>
@@ -37,7 +42,6 @@
     </ul>
     <div class="admin-link"><a href="{{ url_for('admin') }}">⚙️ Admin Panel</a></div>
 </div>
-
     <!-- Main Content -->
     <div class="main-content">
         <div class="header">
