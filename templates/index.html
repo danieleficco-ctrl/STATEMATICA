@@ -8,7 +8,7 @@
     
     <!-- Sidebar -->
     <div class="sidebar">
-    <div class="logo-area">MCU</div>
+    <div class="logo-area"></div>
     <ul class="menu">
         {% for corso in corsi %}
         <li class="course-item" data-corso-id="{{ corso.id }}">
@@ -25,8 +25,8 @@
                         {% for lezione in modulo.lezioni %}
                         <li class="lesson-item" data-lezione-id="{{ lezione.id }}" 
                                 
-<div class="module-title" onclick="toggleModule(this)">
-                        {{ modulo.nome }} <span class="chevron">▼</span>
+                    <div class="module-title" onclick="toggleModule(this)">
+                        {{ lezione.nome }} <span class="chevron">▼</span>
                     </div>
 onclick="selectLesson({{ lezione.id }})">
                             <span class="lesson-icon">▶</span>
